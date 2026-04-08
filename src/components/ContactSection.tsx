@@ -1,7 +1,107 @@
+import { type ChangeEvent, type FormEvent, useState } from 'react'
 import { Building2, Mail, PhoneCall, Send } from 'lucide-react'
 import { FaFacebookF, FaWhatsapp } from 'react-icons/fa'
 
+type ContactFormState = {
+    fullName: string
+    email: string
+    company: string
+    message: string
+}
+
+type SubmitState = {
+    type: 'success' | 'error'
+    message: string
+} | null
+
+const initialFormState: ContactFormState = {
+    fullName: '',
+    email: '',
+    company: '',
+    message: '',
+}
+
+const fallbackDirectEndpoint = 'https://formsubmit.co/ajax/info@al-nama.ly'
+
 export const ContactSection = () => {
+    const [formData, setFormData] = useState<ContactFormState>(initialFormState)
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [submitState, setSubmitState] = useState<SubmitState>(null)
+
+    const formspreeEndpoint = import.meta.env.VITE_FORMSPREE_ENDPOINT?.trim()
+    const submissionEndpoint = formspreeEndpoint || fallbackDirectEndpoint
+
+    const handleChange = (field: keyof ContactFormState) =>
+        (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+            setFormData((previous) => ({ ...previous, [field]: event.target.value }))
+        }
+
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault()
+
+        const trimmed = {
+            fullName: formData.fullName.trim(),
+            email: formData.email.trim(),
+            company: formData.company.trim(),
+            message: formData.message.trim(),
+        }
+
+        if (!trimmed.fullName || !trimmed.email || !trimmed.company || !trimmed.message) {
+            setSubmitState({
+                type: 'error',
+                message: 'الرجاء تعبئة جميع الحقول قبل الإرسال.',
+            })
+            return
+        }
+
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (!emailPattern.test(trimmed.email)) {
+            setSubmitState({
+                type: 'error',
+                message: 'الرجاء إدخال بريد إلكتروني صالح.',
+            })
+            return
+        }
+
+        setSubmitState(null)
+        setIsSubmitting(true)
+
+        try {
+            const response = await fetch(submissionEndpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                },
+                body: JSON.stringify({
+                    name: trimmed.fullName,
+                    email: trimmed.email,
+                    company: trimmed.company,
+                    message: trimmed.message,
+                    _subject: 'رسالة جديدة من صفحة تواصل معنا - شركة النماء',
+                    _captcha: 'false',
+                }),
+            })
+
+            if (!response.ok) {
+                throw new Error('Contact request failed')
+            }
+
+            setFormData(initialFormState)
+            setSubmitState({
+                type: 'success',
+                message: 'تم إرسال رسالتك بنجاح، وسنتواصل معك قريباً عبر البريد info@al-nama.ly.',
+            })
+        } catch {
+            setSubmitState({
+                type: 'error',
+                message: 'تعذر إرسال الرسالة حالياً. الرجاء المحاولة مرة أخرى بعد قليل.',
+            })
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
+
     return (
         <section id="contact" className="contact-section">
             <div className="container">
@@ -36,8 +136,8 @@ export const ContactSection = () => {
                                     </span>
                                     <div>
                                         <strong>البريد الإلكتروني</strong>
-                                        <a href="mailto:info@namaa-agr.ly" className="contact-inline-link contact-data-ltr">
-                                            info@namaa-agr.ly
+                                        <a href="mailto:info@al-nama.ly" className="contact-inline-link contact-data-ltr">
+                                            info@al-nama.ly
                                         </a>
                                     </div>
                                 </div>
@@ -79,26 +179,64 @@ export const ContactSection = () => {
                     </article>
 
                     <article className="contact-form-card">
-                        <form className="contact-form" onSubmit={(event) => event.preventDefault()}>
+                        <form className="contact-form" onSubmit={handleSubmit} noValidate>
                             <label className="contact-field">
                                 <span>الاسم الكامل</span>
-                                <input type="text" placeholder="الاسم الكامل" />
+                                <input
+                                    type="text"
+                                    name="fullName"
+                                    placeholder="مثال: محمد علي"
+                                    value={formData.fullName}
+                                    onChange={handleChange('fullName')}
+                                    required
+                                />
                             </label>
                             <label className="contact-field">
                                 <span>البريد الإلكتروني</span>
-                                <input type="email" placeholder="name@company.com" className="contact-data-ltr" />
+                                <input
+                                    type="email"
+                                    name="email"
+                                    placeholder="name@company.com"
+                                    className="contact-data-ltr"
+                                    value={formData.email}
+                                    onChange={handleChange('email')}
+                                    required
+                                />
                             </label>
                             <label className="contact-field">
                                 <span>اسم الشركة أو الجهة</span>
-                                <input type="text" placeholder="اسم الشركة أو الجهة" />
+                                <input
+                                    type="text"
+                                    name="company"
+                                    placeholder="مثال: شركة النماء للاستثمار"
+                                    value={formData.company}
+                                    onChange={handleChange('company')}
+                                    required
+                                />
                             </label>
                             <label className="contact-field">
                                 <span>نبذة عن هدف الاستثمار أو المشروع</span>
-                                <textarea rows={5} placeholder="مثال: نحتاج إنشاء خط إنتاج أعلاف بطاقة تشغيلية متوسطة" />
+                                <textarea
+                                    name="message"
+                                    rows={5}
+                                    placeholder="مثال: نحتاج إنشاء خط إنتاج أعلاف بطاقة تشغيلية متوسطة"
+                                    value={formData.message}
+                                    onChange={handleChange('message')}
+                                    required
+                                />
                             </label>
-                            <button type="submit" className="btn">
+                            {submitState && (
+                                <p
+                                    className={`contact-form-status contact-form-status-${submitState.type}`}
+                                    role={submitState.type === 'error' ? 'alert' : 'status'}
+                                    aria-live={submitState.type === 'error' ? 'assertive' : 'polite'}
+                                >
+                                    {submitState.message}
+                                </p>
+                            )}
+                            <button type="submit" className="btn" disabled={isSubmitting}>
                                 <Send size={16} aria-hidden="true" />
-                                إرسال الطلب
+                                {isSubmitting ? 'جارٍ إرسال الطلب...' : 'إرسال الطلب'}
                             </button>
                         </form>
                     </article>

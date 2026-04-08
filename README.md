@@ -71,3 +71,25 @@ export default defineConfig([
   },
 ])
 ```
+
+## Contact Form Setup
+
+The Contact section sends messages directly with an HTTP request by default to `info@al-nama.ly`.
+
+Optional: if you want to force a custom provider (for example Formspree), set `VITE_FORMSPREE_ENDPOINT` in `.env`.
+
+1. Copy `.env.example` to `.env`.
+2. Set your endpoint only if you need a custom provider.
+
+Example `.env`:
+
+```bash
+VITE_FORMSPREE_ENDPOINT=https://formspree.io/f/your-form-id
+```
+
+Then run:
+
+```bash
+npm install
+npm run dev
+```
