@@ -163,7 +163,7 @@ export const ContactSection = () => {
                                     <div>
                                         <strong>الهاتف المحمول</strong>
                                         <a href="tel:+218927279080" className="contact-inline-link contact-data-ltr">
-                                            +218 927279080
+                                            +218 92-7279080
                                         </a>
                                     </div>
                                 </div>
