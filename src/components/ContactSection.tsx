@@ -155,10 +155,23 @@ export const ContactSection = () => {
                                     </div>
                                 </div>
                             </li>
+                                                  <li>
+                                <div className="contact-method-head">
+                                    <span className="contact-method-icon" aria-hidden="true">
+                                        <PhoneCall size={16} />
+                                    </span>
+                                    <div>
+                                        <strong>الهاتف المحمول</strong>
+                                        <a href="tel:+218927279080" className="contact-inline-link contact-data-ltr">
+                                            +218 927279080
+                                        </a>
+                                    </div>
+                                </div>
+                            </li>
                         </ul>
                         <div className="contact-social-row" aria-label="روابط واتساب وفيسبوك">
                             <a
-                                href="https://wa.me/218946095733"
+                                href="https://wa.me/218927279080"
                                 className="contact-social-chip"
                                 target="_blank"
                                 rel="noreferrer"

@@ -32,7 +32,7 @@ export const SiteFooter = () => {
                     >
                         <FaWhatsapp size={16} aria-hidden="true" />
                         <span>واتساب</span>
-                        <span className="contact-data-ltr">+218 94-6095733</span>
+                        <span className="contact-data-ltr">+218 92-7279080</span>
                     </a>
                 </div>
                 <p className="footer-copy">
